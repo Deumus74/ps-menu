@@ -1,4 +1,4 @@
-function DrawMenu {
+function Set-Menu {
     param ($menuItems, $menuPosition, $Multiselect, $selection)
     $l = $menuItems.length
     for ($i = 0; $i -le $l;$i++) {
@@ -22,9 +22,9 @@ function DrawMenu {
     }
 }
 
-function Toggle-Selection {
+function Update-Selection {
 	param ($pos, [array]$selection)
-	if ($selection -contains $pos){ 
+	if ($selection -contains $pos){
 		$result = $selection | where {$_ -ne $pos}
 	}
 	else {
@@ -34,7 +34,7 @@ function Toggle-Selection {
 	$result
 }
 
-function Menu {
+function Show-Menu {
     param ([array]$menuItems, [switch]$ReturnIndex=$false, [switch]$Multiselect)
     $vkeycode = 0
     $pos = 0
@@ -43,7 +43,7 @@ function Menu {
 	{
 		try {
 			[console]::CursorVisible=$false #prevents cursor flickering
-			DrawMenu $menuItems $pos $Multiselect $selection
+			Set-Menu $menuItems $pos $Multiselect $selection
 			While ($vkeycode -ne 13 -and $vkeycode -ne 27) {
 				$press = $host.ui.rawui.readkey("NoEcho,IncludeKeyDown")
 				$vkeycode = $press.virtualkeycode
@@ -51,7 +51,7 @@ function Menu {
 				If ($vkeycode -eq 40 -or $press.Character -eq 'j') {$pos++}
 				If ($vkeycode -eq 36) { $pos = 0 }
 				If ($vkeycode -eq 35) { $pos = $menuItems.length - 1 }
-				If ($press.Character -eq ' ') { $selection = Toggle-Selection $pos $selection }
+				If ($press.Character -eq ' ') { $selection = Update-Selection $pos $selection }
 				if ($pos -lt 0) {$pos = 0}
 				If ($vkeycode -eq 27) {$pos = $null }
 				if ($pos -ge $menuItems.length) {$pos = $menuItems.length -1}
@@ -59,7 +59,7 @@ function Menu {
 				{
 					$startPos = [System.Console]::CursorTop - $menuItems.Length
 					[System.Console]::SetCursorPosition(0, $startPos)
-					DrawMenu $menuItems $pos $Multiselect $selection
+					Set-Menu $menuItems $pos $Multiselect $selection
 				}
 			}
 		}
@@ -81,7 +81,7 @@ function Menu {
 			return $menuItems[$pos]
 		}
 	}
-	else 
+	else
 	{
 		if ($Multiselect){
 			return $selection
